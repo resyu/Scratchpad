@@ -1,0 +1,6 @@
+#btn_div{justify-content: center}
+#btn_div p{width:60px;height: 20px;background: rgb(111, 111, 112);color:#fff;font-size: 14px;line-height: 20px;border-radius: 3px;text-align: center;margin:0 10px;cursor: pointer;}
+#content{justify-content: flex-start;height: 520px;width:100%;margin-top: 10px;}
+#result,#edit{width: 50%;padding:10px}
+#result{border-right: 1px solid #ddd}
+#edit{background: #FBF9F9;height: 100%;}

@@ -1,0 +1,43 @@
+{
+  "name": "javascript-run",
+  "version": "0.0.1",
+  "description": "javascript code runing",
+  "main": "main.js",
+  "scripts": {
+    "start": "nodemon --watch views --exec electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "author": "resyu",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^6.0.9",
+    "electron-builder": "^21.2.0",
+    "nodemon": "^1.19.2"
+  },
+  "build": {
+    "appId": "resyu-javascript-runner",
+    "copyright": "resyu",
+    "productName": "代码草稿纸",
+    "directories": {
+      "output": "build"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "assets/imgs/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "publisherName": "Kandra Labs, Inc."
+    }
+  },
+  "dependencies": {
+    "codemirror": "^5.48.4"
+  }
+}

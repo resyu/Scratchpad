@@ -1,0 +1,12 @@
+*{padding:0;margin:0;border: 0;}
+*:focus {
+  outline: none;
+}
+.flex-row{
+  display: flex;
+  flex-direction: row;
+}
+.flex-column{
+  display: flex;
+  flex-direction: column;
+}
