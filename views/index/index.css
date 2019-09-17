@@ -3,4 +3,4 @@
 #content{justify-content: flex-start;height: 520px;width:100%;margin-top: 10px;}
 #result,#edit{width: 50%;padding:10px}
 #result{border-right: 1px solid #ddd}
-#edit{background: #FBF9F9;height: 100%;}
+#edit{background: #FBF9F9;}
