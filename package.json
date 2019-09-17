@@ -1,21 +1,25 @@
 {
-  "name": "javascript-run",
+  "name": "scratchpad",
   "version": "0.0.1",
-  "description": "javascript code runing",
+  "description": "基于electron的javascript代码草稿纸，可运行js代码并用console.log或者log输出执行结果",
   "main": "main.js",
   "scripts": {
     "start": "nodemon --watch views --exec electron .",
     "dist": "electron-builder --win --x64"
   },
   "author": "resyu",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^6.0.9",
     "electron-builder": "^21.2.0",
     "nodemon": "^1.19.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/resyu/Scratchpad.git"
+  },
   "build": {
-    "appId": "resyu-javascript-runner",
+    "appId": "resyu-Scratchpad",
     "copyright": "resyu",
     "productName": "代码草稿纸",
     "directories": {
