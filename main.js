@@ -12,7 +12,7 @@ function createWindow() {
     }
   })
   win.setMenu(null)
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
   win.loadFile('views/index/index.html')
 }
 

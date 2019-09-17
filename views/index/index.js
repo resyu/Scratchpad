@@ -78,6 +78,7 @@ window.onload = function () {
   function clearFun() {
     oEdit.innerHTML = ''
     oResult.innerHTML = ''
+    localStorage.removeItem('inputValue')
     editor.setValue('')
     editor.focus()
   }
