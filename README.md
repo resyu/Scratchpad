@@ -1,0 +1,2 @@
+# Scratchpad
+javascript代码草稿纸，可运行js代码并用console.log或者log输出执行结果
