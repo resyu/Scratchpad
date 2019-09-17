@@ -8,19 +8,31 @@
   <title>代码草稿纸</title>
   <link rel="stylesheet" href="../../assets/css/main.css">
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="../../node_modules/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="../../node_modules/codemirror/theme/eclipse.css">
+  <link rel="stylesheet" href="../../node_modules/codemirror/addon/fold/foldgutter.css" />
 </head>
 
 <body>
   <div id="container" class="flex-column">
     <div id="btn_div" class="flex-row">
+      <p id="focus_btn" title=" ctrl+i ">focus</p>
       <p id="clear_btn" title=" ctrl+l ">clear</p>
       <p id="run_btn" title=" ctrl+r ">run</p>
     </div>
     <div id="content" class="flex-row">
       <div id="result"></div>
-      <div id="edit" contenteditable="true"></div>
+      <textarea id="edit" name="edit" autofocus placeholder="sdsd"></textarea>
     </div>
   </div>
+  <script src="../../node_modules/codemirror/lib/codemirror.js"></script>
+  <script src="../../node_modules/codemirror/mode/javascript/javascript.js"></script>
+  <script src="../../node_modules/codemirror/keymap/sublime.js"></script>
+  <script src="../../node_modules/codemirror/addon/selection/active-line.js"></script>
+  <script src="../../node_modules/codemirror/addon/fold/foldcode.js"></script>
+  <script src="../../node_modules/codemirror/addon/fold/brace-fold.js"></script>
+  <script src="../../node_modules/codemirror/addon/fold/foldgutter.js"></script>
+  <script src="../../node_modules/codemirror/addon/edit/matchbrackets.js"></script>
   <script src="index.js"></script>
 </body>
 

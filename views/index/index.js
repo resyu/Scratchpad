@@ -6,7 +6,9 @@ window.onload = function () {
   let oEdit = document.querySelector("#edit"),
     oResult = document.querySelector("#result"),
     oRun = document.querySelector("#run_btn"),
-    oClear = document.querySelector("#clear_btn")
+    oClear = document.querySelector("#clear_btn"),
+    oFocus = document.querySelector("#focus_btn"),
+    editor
 
   initFun()
   //运行
@@ -17,14 +19,34 @@ window.onload = function () {
   oClear.onclick = function () {
     clearFun()
   }
+  //获得焦点
+  oFocus.onclick = function () {
+    editor.focus()
+  }
   //初始化草稿纸
   function initFun() {
-    oEdit.focus()
-    if (localStorage.inputValue) oEdit.innerText = localStorage.inputValue
+    //CodeMirror configer
+    editor = CodeMirror.fromTextArea(oEdit, {
+      mode: {
+        name: 'javascript',
+        json: true
+      },
+      keyMap: "sublime",
+      lineNumbers: true,
+      lineWrapping: true,
+      styleActiveLine: true,
+      theme: "eclipse",
+      foldGutter: true,
+      matchBrackets: true,
+      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+      showCursorWhenSelecting: true
+    })
+    editor.focus()
+    if (localStorage.inputValue) editor.setValue(localStorage.inputValue)
   }
   //输出
   function consoleFun() {
-    let inputStr = oEdit.innerText
+    let inputStr = editor.getValue()
     if (inputStr) {
       let itemInput = '', //分段
         aTempStr = [], //中间件
@@ -48,7 +70,6 @@ window.onload = function () {
         let codeStr = inputStr.replace(regReplace, "return") //要执行的code
         sResult = runFun(codeStr)
       }
-
       localStorage.inputValue = inputStr
       sResult && (oResult.innerHTML = sResult)
     }
@@ -57,11 +78,16 @@ window.onload = function () {
   function clearFun() {
     oEdit.innerHTML = ''
     oResult.innerHTML = ''
-    oEdit.focus()
+    editor.setValue('')
+    editor.focus()
   }
   //运行code
   function runFun(code) {
-    return Function(code)()
+    try {
+      return Function(code)()
+    } catch (error) {
+      alert(error)
+    }
   }
   //快捷键
   document.onkeydown = function (event) {
@@ -71,7 +97,7 @@ window.onload = function () {
       consoleFun()
     }
     if (kc === 73 && e.ctrlKey) {
-      oEdit.focus()
+      editor.focus()
     }
     if (kc === 76 && e.ctrlKey) {
       clearFun()
