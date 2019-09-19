@@ -16,13 +16,14 @@
 <body>
   <div id="container" class="flex-column">
     <div id="btn_div" class="flex-row">
-      <p id="focus_btn" title=" ctrl+i ">focus</p>
+      <p id="save_btn" title=" ctrl+s ">save</p>
       <p id="clear_btn" title=" ctrl+l ">clear</p>
       <p id="run_btn" title=" ctrl+r ">run</p>
     </div>
     <div id="content" class="flex-row">
-      <div id="result"></div>
+      <div id="result" class="flex-column"></div>
       <textarea id="edit" name="edit" autofocus placeholder="sdsd"></textarea>
+      <div id="state">行 0，列 0</div>
     </div>
   </div>
   <script src="../../node_modules/codemirror/lib/codemirror.js"></script>
