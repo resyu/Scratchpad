@@ -15,15 +15,24 @@
 
 <body>
   <div id="container" class="flex-column">
-    <div id="btn_div" class="flex-row">
-      <p id="save_btn" title=" ctrl+s ">save</p>
-      <p id="clear_btn" title=" ctrl+l ">clear</p>
-      <p id="run_btn" title=" ctrl+r ">run</p>
-    </div>
     <div id="content" class="flex-row">
       <div id="result" class="flex-column"></div>
-      <textarea id="edit" name="edit" autofocus placeholder="sdsd"></textarea>
+      <textarea id="edit" name="edit" autofocus></textarea>
       <div id="state">行 0，列 0</div>
+      <div class="tip_txt flex-column">
+        <p>/*</p>
+        <p>*</p>
+        <p>*&nbsp;&nbsp;  这是一张 JavaScript 代码草稿纸</p>
+        <p>*&nbsp;&nbsp;</p>
+        <p>*&nbsp;&nbsp;  输入一些 JavaScript，通过</p>
+        <p>*&nbsp;&nbsp;  console.log()、log()、alert()</p>
+        <p>*&nbsp;&nbsp;  打印运行结果</p>
+        <p>*&nbsp;&nbsp;</p>
+        <p>*&nbsp;&nbsp;  1. 运行 (Ctrl+R)；</p>
+        <p>*&nbsp;&nbsp;  2. 清屏 (Ctrl+L)；</p>
+        <p>*</p>
+        <p>*/</p>
+      </div>
     </div>
   </div>
   <script src="../../node_modules/codemirror/lib/codemirror.js"></script>

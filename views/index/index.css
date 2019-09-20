@@ -1,25 +1,8 @@
 html,body{height: 100%;}
-#btn_div {
-  justify-content: center
-}
-
-#btn_div p {
-  width: 60px;
-  height: 20px;
-  background: rgb(111, 111, 112);
-  color: #fff;
-  font-size: 14px;
-  line-height: 20px;
-  border-radius: 3px;
-  text-align: center;
-  margin: 0 10px;
-  cursor: pointer;
-}
-
 #content {
   justify-content: flex-start;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 #result,
@@ -30,7 +13,7 @@ html,body{height: 100%;}
 #result{width:34%;font-size: 13px;color:#555;}
 #result p{justify-content: space-between;line-height: 20px;padding:2px 0;border-bottom:1px solid #eee;align-items: center}
 #result p span:nth-child(1){width:80%}
-#result p span:nth-child(2){font-size: 12px;color:#456ddf;cursor: pointer;}
+#result p span.line_tip{font-size: 12px;color:#456ddf;cursor: pointer;}
 .CodeMirror {
   background: #FBF9F9 !important;
   font-family: 'Consolas', 'Courier' !important;
@@ -47,3 +30,8 @@ html,body{height: 100%;}
   background: #FBF9F9 !important;
 }
 #state{color:#555;background: #FBF9F9;height: 14px;line-height: 14px;font-size: 12px;position: fixed;bottom:3px;padding:0 10px;text-align: right;right:20px;z-index: 999999;}
+.tip_txt{font-size: 12px;position: absolute;top:50%;left:6%;transform: translate(-6%,-50%);color:rgb(152, 152, 152);}
+.blue_txt{color:#456ddf}
+.red_txt{color:#df4566}
+.gray_txt{color:rgb(152, 152, 152);}
+.json_span{font-style: italic}

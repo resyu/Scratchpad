@@ -1,34 +1,28 @@
+const {
+  ipcRenderer
+} = require('electron')
+const {
+  $
+} = require('../../helper')
+
 window.onload = () => {
 
   const regReplace = /console.log|log|alert/g,
     regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
 
-  let oEdit = document.querySelector("#edit"),
-    oResult = document.querySelector("#result"),
-    oRun = document.querySelector("#run_btn"),
-    oClear = document.querySelector("#clear_btn"),
-    oSave = document.querySelector("#save_btn"),
+  let oEdit = $("#edit"),
+    oResult = $("#result"),
+    oTip_txt = $(".tip_txt"),
     aGetConsoleForLine = [],
     aGetConsoleForLineBack = [],
     editor
 
   initFun()
-  //运行
-  oRun.onclick = () => {
-    consoleFun();
-  }
-  //清屏
-  oClear.onclick = () => {
-    clearFun()
-  }
-  //保存
-  oSave.onclick = () => {
-    saveFun()
-  }
+
   //行列
   editor.on('cursorActivity', () => {
     let pos = editor.getCursor()
-    document.querySelector('#state').innerHTML = `行 ${pos.line+1}，列 ${pos.ch}`
+    $('#state').innerHTML = `行 ${pos.line+1}，列 ${pos.ch}`
   })
   //resize
   window.addEventListener('resize', () => {
@@ -36,8 +30,8 @@ window.onload = () => {
   })
   //init content div
   function initContentDivFun() {
-    document.querySelector('#content').style.height = parseInt(window.innerHeight) - 30 + 'px'
-    document.querySelector('#result').style.height = parseInt(window.innerHeight) - 30 + 'px'
+    $('#content').style.height = parseInt(window.innerHeight) - 20 + 'px'
+    $('#result').style.height = parseInt(window.innerHeight) - 20 + 'px'
   }
   //初始化草稿纸
   function initFun() {
@@ -83,28 +77,68 @@ window.onload = () => {
             itemInput = sContentTemp.concat(logKey[i]).replace(regReplace, "return")
             //运行代码并把输出赋给aItemOutput
             sCodeRun = runFun(itemInput)
-            sCodeRun && aItemOutput.push(sCodeRun)
+            aItemOutput.push(sCodeRun)
           }
         } else { //单个输出
           let codeStr = inputStr.replace(regReplace, "return") //要执行的code
           aGetConsoleForLine = getLineFun(logKey)
           sCodeRun = runFun(codeStr)
-          sCodeRun && aItemOutput.push(sCodeRun)
+          aItemOutput.push(sCodeRun)
         }
         localStorage.inputValue = inputStr
         for (let i = 0; i < aItemOutput.length; i++) {
-          sResult += `<p class="flex-row"><span>${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
+          let spanColor = '',
+            jsonH = ''
+          if (Array.isArray(aItemOutput[i])) {
+            aItemOutput[i] = `[${aItemOutput[i]}]`
+          } else if (aItemOutput[i] == null) {
+            spanColor = 'gray_txt'
+          } else if (typeof aItemOutput[i] === 'string') {
+            aItemOutput[i] = `'${aItemOutput[i]}'`
+          } else if (typeof aItemOutput[i] === 'boolean') {
+            spanColor = 'blue_txt'
+          } else if (typeof aItemOutput[i] === 'object') {
+            if (aItemOutput[i].__proto__.name && aItemOutput[i].__proto__.name === 'ReferenceError') {
+              spanColor = 'red_txt'
+            } else {
+              if (isJSON(aItemOutput[i])) {
+                for (let k in aItemOutput[i]) {
+                  jsonH += `<span>${k}：</span><span class="red_txt">"${aItemOutput[i][k]}"</span>，`
+                }
+                aItemOutput[i] = `{ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} }`
+                spanColor = 'json_span'
+              }
+            }
+          }
+          sResult += `<p class="flex-row"><span class="${spanColor}">${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
         }
-        sResult && (oResult.innerHTML = sResult)
+        if (sResult) {
+          oTip_txt.style.display = 'none'
+          oResult.innerHTML = sResult
+        }
         aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
         aGetConsoleForLine.length = 0
         //点击行号跳转到对应的代码
-        for (let i = 0; i < document.querySelectorAll('.line_tip').length; i++) {
-          document.querySelectorAll('.line_tip')[i].addEventListener('click', () => {
+        for (let i = 0; i < $('.line_tip', true).length; i++) {
+          $('.line_tip', true)[i].addEventListener('click', () => {
             editor.setCursor(aGetConsoleForLineBack[i])
           })
         }
       }
+    }
+  }
+
+  function isJSON(str) {
+    try {
+      let obj = JSON.stringify(str);
+      if (typeof obj == 'string' && obj) {
+        return true;
+      } else {
+        return false;
+      }
+
+    } catch (e) {
+      return false;
     }
   }
   //根据内容获取行号
@@ -126,6 +160,7 @@ window.onload = () => {
   function clearFun() {
     oEdit.innerHTML = ''
     oResult.innerHTML = ''
+    oTip_txt.style.display = 'block'
     localStorage.removeItem('inputValue')
     editor.setValue('')
     editor.focus()
@@ -155,6 +190,6 @@ window.onload = () => {
   }
   //保存
   function saveFun() {
-    console.log('save')
+    ipcRenderer.send('save')
   }
 }
