@@ -1,7 +1,7 @@
-window.onload = function () {
+window.onload = () => {
 
-  const regReplace = /console.log|log/g,
-    regMatch = /console.log\(.*?\)|log\(.*?\)/g
+  const regReplace = /console.log|log|alert/g,
+    regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
 
   let oEdit = document.querySelector("#edit"),
     oResult = document.querySelector("#result"),
@@ -14,24 +14,24 @@ window.onload = function () {
 
   initFun()
   //运行
-  oRun.onclick = function () {
+  oRun.onclick = () => {
     consoleFun();
   }
   //清屏
-  oClear.onclick = function () {
+  oClear.onclick = () => {
     clearFun()
   }
   //保存
-  oSave.onclick = function () {
+  oSave.onclick = () => {
     saveFun()
   }
   //行列
-  editor.on('cursorActivity', function () {
+  editor.on('cursorActivity', () => {
     let pos = editor.getCursor()
     document.querySelector('#state').innerHTML = `行 ${pos.line+1}，列 ${pos.ch}`
   })
   //resize
-  window.addEventListener('resize', function () {
+  window.addEventListener('resize', () => {
     initContentDivFun()
   })
   //init content div
@@ -73,35 +73,37 @@ window.onload = function () {
         sCodeRun = '', //代码运行结果
         logKey = inputStr.match(regMatch) //匹配"console.log()"
 
-      if (logKey != null && logKey.length > 1) { //多个输出
-        aTempStr = inputStr.trim().split(regMatch) //按"console.log()"拆分
-        aGetConsoleForLine = getLineFun(logKey)
-        for (let i = 0; i < logKey.length; i++) {
-          //得到要运行的分段字符串
-          sContentTemp += aTempStr[i]
-          itemInput = sContentTemp.concat(logKey[i]).replace(regReplace, "return")
-          //运行代码并把输出赋给aItemOutput
-          sCodeRun = runFun(itemInput)
+      if (logKey != null) {
+        if (logKey.length > 1) { //多个输出
+          aTempStr = inputStr.trim().split(regMatch) //按"console.log()"拆分
+          aGetConsoleForLine = getLineFun(logKey)
+          for (let i = 0; i < logKey.length; i++) {
+            //得到要运行的分段字符串
+            sContentTemp += aTempStr[i]
+            itemInput = sContentTemp.concat(logKey[i]).replace(regReplace, "return")
+            //运行代码并把输出赋给aItemOutput
+            sCodeRun = runFun(itemInput)
+            sCodeRun && aItemOutput.push(sCodeRun)
+          }
+        } else { //单个输出
+          let codeStr = inputStr.replace(regReplace, "return") //要执行的code
+          aGetConsoleForLine = getLineFun(logKey)
+          sCodeRun = runFun(codeStr)
           sCodeRun && aItemOutput.push(sCodeRun)
         }
-      } else { //单个输出
-        let codeStr = inputStr.replace(regReplace, "return") //要执行的code
-        aGetConsoleForLine = getLineFun(logKey)
-        sCodeRun = runFun(codeStr)
-        sCodeRun && aItemOutput.push(sCodeRun)
-      }
-      localStorage.inputValue = inputStr
-      for (let i = 0; i < aItemOutput.length; i++) {
-        sResult += `<p class="flex-row"><span>${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
-      }
-      sResult && (oResult.innerHTML = sResult)
-      aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
-      aGetConsoleForLine.length = 0
-      //点击行号跳转到对应的代码
-      for (let i = 0; i < document.querySelectorAll('.line_tip').length; i++) {
-        document.querySelectorAll('.line_tip')[i].addEventListener('click', function () {
-          editor.setCursor(aGetConsoleForLineBack[i])
-        })
+        localStorage.inputValue = inputStr
+        for (let i = 0; i < aItemOutput.length; i++) {
+          sResult += `<p class="flex-row"><span>${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
+        }
+        sResult && (oResult.innerHTML = sResult)
+        aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
+        aGetConsoleForLine.length = 0
+        //点击行号跳转到对应的代码
+        for (let i = 0; i < document.querySelectorAll('.line_tip').length; i++) {
+          document.querySelectorAll('.line_tip')[i].addEventListener('click', () => {
+            editor.setCursor(aGetConsoleForLineBack[i])
+          })
+        }
       }
     }
   }
