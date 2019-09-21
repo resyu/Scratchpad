@@ -90,16 +90,19 @@ window.onload = () => {
           let spanColor = '',
             jsonH = ''
           if (Array.isArray(aItemOutput[i])) {
-            aItemOutput[i] = `[${aItemOutput[i]}]`
+            for (let a=0;a<aItemOutput[i].length;a++) {
+              jsonH += `<span class="blue_txt">${aItemOutput[i][a]}</span>，`
+            }
+            aItemOutput[i] = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
           } else if (aItemOutput[i] == null) {
             spanColor = 'gray_txt'
           } else if (typeof aItemOutput[i] === 'string') {
-            aItemOutput[i] = `'${aItemOutput[i]}'`
+            aItemOutput[i] = `"<span class="blue_txt">${aItemOutput[i]}</span>"`
           } else if (typeof aItemOutput[i] === 'boolean') {
             spanColor = 'blue_txt'
           } else if (typeof aItemOutput[i] === 'object') {
             if (aItemOutput[i].__proto__.name && aItemOutput[i].__proto__.name === 'ReferenceError') {
-              spanColor = 'red_txt'
+              spanColor = 'red_txt error'
             } else {
               if (isJSON(aItemOutput[i])) {
                 for (let k in aItemOutput[i]) {
