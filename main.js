@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2019-09-17 13:26:30
+ * @LastEditTime : 2020-01-01 11:44:12
+ * @LastEditors  : Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \scratchpad\main.js
+ */
 const {
   app,
   BrowserWindow,
@@ -33,16 +41,28 @@ app.on('ready', () => {
     transparent: true
   }, 'views/index/index.html')
   mainWin.setMenu(null)
-  // mainWin.webContents.openDevTools()
-  ipcMain.on('save', () => {
-    dialog.showSaveDialog({
+  mainWin.webContents.openDevTools()
+  ipcMain.on('save', (event) => {
+    const options = {
       title: '文件另存为',
       filters: [{
         name: 'javaScript',
         extensions: ['js', 'es6', 'mjs', 'pac']
       }]
-    },(fileName)=>{
-      console.log(fileName)
+    }
+    dialog.showSaveDialog(options, function (filename) {
+      event.sender.send('saved-file', filename)
     })
   })
+  // ipcMain.on('save', () => {
+  //   dialog.showSaveDialog({
+  //     title: '文件另存为',
+  //     filters: [{
+  //       name: 'javaScript',
+  //       extensions: ['js', 'es6', 'mjs', 'pac']
+  //     }]
+  //   },(fileName)=>{
+  //     console.log(fileName)
+  //   })
+  // })
 })

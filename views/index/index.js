@@ -8,6 +8,8 @@ const {
 window.onload = () => {
 
   const regReplace = /console.log|log|alert/g,
+    regReturnMatch = /return\(.*?\)/g,
+    regReturnReplace = /return\(|\)/g,
     regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
 
   let oEdit = $("#edit"),
@@ -59,66 +61,63 @@ window.onload = () => {
   function consoleFun() {
     let inputStr = editor.getValue()
     if (inputStr) {
-      let itemInput = '', //分段
-        aTempStr = [], //按"console.log()"拆分
-        sContentTemp = '', //分段字符串中间件
-        aItemOutput = [], //分段输出
+      let aItemOutput = [], //分段输出
         sResult = '', //最终输出
         sCodeRun = '', //代码运行结果
         logKey = inputStr.match(regMatch) //匹配"console.log()"
-
+        console.log(logKey)
       if (logKey != null) {
-        if (logKey.length > 1) { //多个输出
-          aTempStr = inputStr.trim().split(regMatch) //按"console.log()"拆分
-          aGetConsoleForLine = getLineFun(logKey)
-          for (let i = 0; i < logKey.length; i++) {
-            //得到要运行的分段字符串
-            sContentTemp += aTempStr[i]
-            itemInput = sContentTemp.concat(logKey[i]).replace(regReplace, "return")
-            //运行代码并把输出赋给aItemOutput
-            sCodeRun = runFun(itemInput)
-            aItemOutput.push(sCodeRun)
-          }
-        } else { //单个输出
-          let codeStr = inputStr.replace(regReplace, "return") //要执行的code
-          aGetConsoleForLine = getLineFun(logKey)
-          sCodeRun = runFun(codeStr)
-          aItemOutput.push(sCodeRun)
+        let codeStr = inputStr.replace(regReplace, "return"), //要执行的code
+          tempStr = inputStr.replace(regMatch, "returnres"),
+          matchCodeStr = codeStr.match(regReturnMatch),
+          tempa, tempb
+
+        // console.log(tempa)
+        for (let logI = 0; logI < matchCodeStr.length; logI++) {
+          let regL = new RegExp(`return\(${matchCodeStr[logI].replace(regReturnReplace,'')}\)`)
+          // tempa=tempStr.replace(regReturnMatch,`$("#result").appendChild(<p>sdsd</p>)`)
+          console.log(regL)
+          // inputStr=inputStr.replace(/console.log(t)/g,'this')
+          // codeStr=codeStr.replace(regL,`eeeeee`)
+          console.log(codeStr.replace(regL, `eeeeee`))
         }
+        aGetConsoleForLine = getLineFun(logKey)
+        sCodeRun = runFun(tempa)
+        aItemOutput.push(sCodeRun)
         localStorage.inputValue = inputStr
-        for (let i = 0; i < aItemOutput.length; i++) {
-          let spanColor = '',
-            jsonH = ''
-          if (Array.isArray(aItemOutput[i])) {
-            for (let a=0;a<aItemOutput[i].length;a++) {
-              jsonH += `<span class="blue_txt">${aItemOutput[i][a]}</span>，`
-            }
-            aItemOutput[i] = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
-          } else if (aItemOutput[i] == null) {
-            spanColor = 'gray_txt'
-          } else if (typeof aItemOutput[i] === 'string') {
-            aItemOutput[i] = `"<span class="blue_txt">${aItemOutput[i]}</span>"`
-          } else if (typeof aItemOutput[i] === 'boolean') {
-            spanColor = 'blue_txt'
-          } else if (typeof aItemOutput[i] === 'object') {
-            if (aItemOutput[i].__proto__.name && aItemOutput[i].__proto__.name === 'ReferenceError') {
-              spanColor = 'red_txt error'
-            } else {
-              if (isJSON(aItemOutput[i])) {
-                for (let k in aItemOutput[i]) {
-                  jsonH += `<span>${k}：</span><span class="red_txt">"${aItemOutput[i][k]}"</span>，`
-                }
-                aItemOutput[i] = `{ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} }`
-                spanColor = 'json_span'
-              }
-            }
-          }
-          sResult += `<p class="flex-row"><span class="${spanColor}">${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
-        }
-        if (sResult) {
-          oTip_txt.style.display = 'none'
-          oResult.innerHTML = sResult
-        }
+        // for (let i = 0; i < aItemOutput.length; i++) {
+        //   let spanColor = '',
+        //     jsonH = ''
+        //   if (Array.isArray(aItemOutput[i])) {
+        //     for (let a = 0; a < aItemOutput[i].length; a++) {
+        //       jsonH += `<span class="blue_txt">${aItemOutput[i][a]}</span>，`
+        //     }
+        //     aItemOutput[i] = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
+        //   } else if (aItemOutput[i] == null) {
+        //     spanColor = 'gray_txt'
+        //   } else if (typeof aItemOutput[i] === 'string') {
+        //     aItemOutput[i] = `"<span class="blue_txt">${aItemOutput[i]}</span>"`
+        //   } else if (typeof aItemOutput[i] === 'boolean') {
+        //     spanColor = 'blue_txt'
+        //   } else if (typeof aItemOutput[i] === 'object') {
+        //     if (aItemOutput[i].__proto__.name && aItemOutput[i].__proto__.name === 'ReferenceError') {
+        //       spanColor = 'red_txt error'
+        //     } else {
+        //       if (isJSON(aItemOutput[i])) {
+        //         for (let k in aItemOutput[i]) {
+        //           jsonH += `<span>${k}：</span><span class="red_txt">"${aItemOutput[i][k]}"</span>，`
+        //         }
+        //         aItemOutput[i] = `{ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} }`
+        //         spanColor = 'json_span'
+        //       }
+        //     }
+        //   }
+        //   sResult += `<p class="flex-row"><span class="${spanColor}">${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
+        // }
+        // if (sResult) {
+        //   oTip_txt.style.display = 'none'
+        //   oResult.innerHTML = sResult
+        // }
         aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
         aGetConsoleForLine.length = 0
         //点击行号跳转到对应的代码
@@ -129,6 +128,10 @@ window.onload = () => {
         }
       }
     }
+  }
+
+  function testFun(arg) {
+    console.log(arg)
   }
 
   function isJSON(str) {
@@ -195,4 +198,8 @@ window.onload = () => {
   function saveFun() {
     ipcRenderer.send('save')
   }
+  ipcRenderer.on('saved-file', (event, path) =>{
+    if(!path) path = 'no path'
+    console.log(`选择的路径：${path}`)
+  })
 }
