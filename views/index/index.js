@@ -11,7 +11,7 @@ window.onload = () => {
   const regReplace = /console.log|log|alert/g,
     // regReturnMatch = /return\(.*?\)/g,
     // regReturnReplace = /return\(|\)/g,
-    regMatch = /.*?console.log\(.*?\).*?|.*?log\(.*?\).*?|.*?alert\(.*?\).*?/g
+    regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
 
   let oEdit = $("#edit"),
     oResult = $("#result"),
@@ -19,7 +19,6 @@ window.onload = () => {
     aGetConsoleForLine = [],
     aGetConsoleForLineBack = [],
     editor,
-    aItemOutput = [], //分段输出
     sResult = '', //最终输出
     delog = {}
 
@@ -70,14 +69,9 @@ window.onload = () => {
         codeStr = '' //要执行的code
         logKey && (codeStr = inputStr.replace(regReplace, "console.log")) // 替换成 'console.log'
         aGetConsoleForLine = getLineFun(logKey) // 行号
-        delog.log(logKey, 'logKey')
         delog.log(aGetConsoleForLine, 'aGetConsoleForLine')
-        runFun(codeStr) // 运行
-        delog.log(aItemOutput, 'aItemOutput')
         localStorage.inputValue = inputStr
-        for (let i = 0; i < aItemOutput.length; i++) {
-          outPutFun(aItemOutput[i], i)
-        }
+        runFun(codeStr) // 运行
     }
   }
   
@@ -119,24 +113,24 @@ window.onload = () => {
     }
   }
 
-  function outPutFun(aItemOutput, index) {
+  function outPutFun(oItem) {
     let _joinItem = '',
       _joinJson = {}
-    if (aItemOutput.length > 1) {
+    if (oItem.length > 1) {
       _joinItem = ''
-      for (let i=0; i< aItemOutput.length; i++) {
-        _joinItem += `<span class="${_joinLog(aItemOutput[i]).spanColor}">${_joinLog(aItemOutput[i]).item}</span> `
+      for (let i=0; i< oItem.length; i++) {
+        _joinItem += `<span class="${_joinLog(oItem[i]).spanColor}">${_joinLog(oItem[i]).item}</span> `
       }
       _joinItem = `<span>${_joinItem}</span>`
     } else {
-      if (Array.isArray(aItemOutput)) {
-        _joinJson = _joinLog(...aItemOutput)
+      if (Array.isArray(oItem)) {
+        _joinJson = _joinLog(...oItem)
       } else {
-        _joinJson = _joinLog(aItemOutput)
+        _joinJson = _joinLog(oItem)
       }
       _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
     }
-    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip">行 ${aGetConsoleForLine[index]+1}</span></p>`
+    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip">行 ${aGetConsoleForLine[0]+1}</span></p>`
     if (sResult) {
       oTip_txt.style.display = 'none'
       oResult.innerHTML = sResult
@@ -158,25 +152,22 @@ window.onload = () => {
       } else {
         return false
       }
-
     } catch (e) {
       return false
     }
   }
   //根据内容获取行号
   function getLineFun(sKey) {
-    let aContent = editor.getLineHandle(editor.lineCount() - 1).parent.lines,
-      nContent = 0
-    delog.log(aContent, 'aContent')
+    let aContent = editor.getLineHandle(editor.lineCount() - 1).parent.lines
     for (let i = 0; i < sKey.length; i++) {
-      for (let j = nContent; j < aContent.length; j++) {
+      for (let j = 0; j < aContent.length; j++) {
         if (sKey[i] === aContent[j].text) {
           aGetConsoleForLine.push(j)
-          // delog.log(j)
-          // nContent = j + 1
           break
         }
+        delog.log(j, 'j')
       }
+      delog.log('--------')
     }
     return aGetConsoleForLine
   }
@@ -194,7 +185,7 @@ window.onload = () => {
     try {
       Function(code)()
     } catch (error) {
-      aItemOutput.push(error)
+      outPutFun(error)
     }
   }
   //快捷键
@@ -203,7 +194,6 @@ window.onload = () => {
       kc = e.keyCode || e.charCode
 
     if (kc === 82 && e.ctrlKey) {
-      aItemOutput = []
       consoleFun()
     } else if (kc === 73 && e.ctrlKey) {
       editor.focus()
@@ -227,8 +217,7 @@ window.onload = () => {
     }
   }
   function consoleAgent(item) {
-    aItemOutput.push(item.logs)
-    // delog.log(item.logs, 'agent')
+    outPutFun(item.logs)
   }
   //保存
   function saveFun() {
