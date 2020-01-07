@@ -6,20 +6,18 @@ const {
 } = require('../../helper')
 
 window.onload = () => {
-
-  // const regReplace = /[^console.log]log|alert/g,
-  const regReplace = /console.log|log|alert/g,
-    // regReturnMatch = /return\(.*?\)/g,
-    // regReturnReplace = /return\(|\)/g,
-    regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
+  const regExegesis = /\/\/.*/g, // 注释
+    regReplace = /console.log|log|alert/g,
+    regMatch = /console.log\(.*\)|log\(.*\)|alert\(.*\)/g,
+    regContent = /(?<=\(('*|"*))([^('*|"*)\)]+)(?=('*|"*)\))/g // 括弧里面的内容
 
   let oEdit = $("#edit"),
     oResult = $("#result"),
     oTip_txt = $(".tip_txt"),
     aGetConsoleForLine = [],
-    aGetConsoleForLineBack = [],
     editor,
     sResult = '', //最终输出
+    jLineNum = {},
     delog = {}
 
   initFun()
@@ -29,15 +27,18 @@ window.onload = () => {
     let pos = editor.getCursor()
     $('#state').innerHTML = `行 ${pos.line+1}，列 ${pos.ch}`
   })
+
   //resize
   window.addEventListener('resize', () => {
     initContentDivFun()
   })
+
   //init content div
   function initContentDivFun() {
     $('#content').style.height = parseInt(window.innerHeight) - 20 + 'px'
     $('#result').style.height = parseInt(window.innerHeight) - 20 + 'px'
   }
+
   //初始化草稿纸
   function initFun() {
     initContentDivFun()
@@ -61,40 +62,43 @@ window.onload = () => {
     if (localStorage.inputValue) editor.setValue(localStorage.inputValue)
     consoleInit()
   }
+
   //输出
   function consoleFun() {
     let inputStr = editor.getValue()
+
+    sResult = ''
     if (inputStr) {
-      let logKey = inputStr.match(regMatch), //匹配用户 "console || alert"
+      let logKey = inputStr.replace(regExegesis, '').trim().match(regMatch), //匹配用户 "console || alert"
         codeStr = '' //要执行的code
-        logKey && (codeStr = inputStr.replace(regReplace, "console.log")) // 替换成 'console.log'
-        aGetConsoleForLine = getLineFun(logKey) // 行号
-        delog.log(aGetConsoleForLine, 'aGetConsoleForLine')
-        localStorage.inputValue = inputStr
-        runFun(codeStr) // 运行
+        
+      logKey && (codeStr = inputStr.replace(regReplace, "console.log")) // 替换成 'console.log'
+      aGetConsoleForLine = getLineFun(logKey) // 行号
+      localStorage.inputValue = inputStr
+      // 内容、行号对应关系
+      for (let i in logKey) {
+        jLineNum[logKey[i].trim().match(regContent).toString()] = aGetConsoleForLine[i]
+      }
+      runFun(codeStr) // 运行
     }
   }
-  
+
   function _joinLog(item) {
     let spanColor = '',
       jsonH = ''
+
     if (Array.isArray(item)) {
-      delog.log('Array')
       for (let a = 0; a < item.length; a++) {
         jsonH += `<span class="blue_txt">${item[a]}</span>，`
       }
       item = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
     } else if (item === null) {
-      delog.log('null')
       spanColor = 'gray_txt'
     } else if (typeof item === 'string') {
-      delog.log('string')
       item = `"<span class="blue_txt">${item}</span>"`
     } else if (typeof item === 'boolean') {
-      delog.log('boolean')
       spanColor = 'blue_txt'
     } else if (typeof item === 'object') {
-      delog.log(item.__proto__.__proto__, 'error')
       if (item.__proto__.__proto__ && item.__proto__.__proto__.name === 'Error') {
         spanColor = 'red_txt error'
       } else {
@@ -116,9 +120,11 @@ window.onload = () => {
   function outPutFun(oItem) {
     let _joinItem = '',
       _joinJson = {}
+    
+    // console单项内容大于一个
     if (oItem.length > 1) {
-      _joinItem = ''
-      for (let i=0; i< oItem.length; i++) {
+      // 遍历单项，整合结果到_joinItem
+      for (let i = 0; i < oItem.length; i++) {
         _joinItem += `<span class="${_joinLog(oItem[i]).spanColor}">${_joinLog(oItem[i]).item}</span> `
       }
       _joinItem = `<span>${_joinItem}</span>`
@@ -130,23 +136,23 @@ window.onload = () => {
       }
       _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
     }
-    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip">行 ${aGetConsoleForLine[0]+1}</span></p>`
+    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip" data-n="${jLineNum[oItem.toString()]}">行 ${jLineNum[oItem.toString()]+1}</span></p>`
     if (sResult) {
       oTip_txt.style.display = 'none'
       oResult.innerHTML = sResult
     }
-    aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
-    aGetConsoleForLine.length = 0
     //点击行号跳转到对应的代码
     for (let i = 0; i < $('.line_tip', true).length; i++) {
-      $('.line_tip', true)[i].addEventListener('click', () => {
-        editor.setCursor(aGetConsoleForLineBack[i])
+      $('.line_tip', true)[i].addEventListener('click', (e) => {
+        editor.setCursor(parseInt(e.target.dataset.n))
       })
     }
   }
+
   function isJSON(str) {
     try {
       let obj = JSON.stringify(str)
+
       if (typeof obj == 'string' && obj) {
         return true
       } else {
@@ -156,23 +162,25 @@ window.onload = () => {
       return false
     }
   }
+
   //根据内容获取行号
   function getLineFun(sKey) {
     let aContent = editor.getLineHandle(editor.lineCount() - 1).parent.lines
+
     for (let i = 0; i < sKey.length; i++) {
       for (let j = 0; j < aContent.length; j++) {
-        if (sKey[i] === aContent[j].text) {
+        if (sKey[i] === aContent[j].text.trim()) {
           aGetConsoleForLine.push(j)
           break
         }
-        delog.log(j, 'j')
       }
-      delog.log('--------')
     }
     return aGetConsoleForLine
   }
+
   //清屏
   function clearFun() {
+    sResult = ''
     oEdit.innerHTML = ''
     oResult.innerHTML = ''
     oTip_txt.style.display = 'block'
@@ -180,6 +188,7 @@ window.onload = () => {
     editor.setValue('')
     editor.focus()
   }
+
   //运行code
   function runFun(code) {
     try {
@@ -188,6 +197,7 @@ window.onload = () => {
       outPutFun(error)
     }
   }
+
   //快捷键
   document.onkeydown = function (event) {
     let e = event || window.event,
@@ -203,8 +213,9 @@ window.onload = () => {
       saveFun()
     }
   }
+
   function consoleInit() {
-    if(!window.console) {
+    if (!window.console) {
       window.console = {}
     } else {
       delog.log = window.console.log
@@ -216,15 +227,18 @@ window.onload = () => {
       })
     }
   }
+
   function consoleAgent(item) {
     outPutFun(item.logs)
   }
+
   //保存
   function saveFun() {
     ipcRenderer.send('save')
   }
-  ipcRenderer.on('saved-file', (event, path) =>{
-    if(!path) path = 'no path'
+
+  ipcRenderer.on('saved-file', (event, path) => {
+    if (!path) path = 'no path'
     delog.log(`选择的路径：${path}`)
   })
 }

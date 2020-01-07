@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-09-17 13:26:30
- * @LastEditTime : 2020-01-01 11:44:12
+ * @LastEditTime : 2020-01-08 00:05:47
  * @LastEditors  : Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \scratchpad\main.js
@@ -41,7 +41,7 @@ app.on('ready', () => {
     transparent: true
   }, 'views/index/index.html')
   mainWin.setMenu(null)
-  mainWin.webContents.openDevTools()
+  // mainWin.webContents.openDevTools()
   ipcMain.on('save', (event) => {
     const options = {
       title: '文件另存为',
