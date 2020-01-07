@@ -7,17 +7,21 @@ const {
 
 window.onload = () => {
 
+  // const regReplace = /[^console.log]log|alert/g,
   const regReplace = /console.log|log|alert/g,
-    regReturnMatch = /return\(.*?\)/g,
-    regReturnReplace = /return\(|\)/g,
-    regMatch = /console.log\(.*?\)|log\(.*?\)|alert\(.*?\)/g
+    // regReturnMatch = /return\(.*?\)/g,
+    // regReturnReplace = /return\(|\)/g,
+    regMatch = /.*?console.log\(.*?\).*?|.*?log\(.*?\).*?|.*?alert\(.*?\).*?/g
 
   let oEdit = $("#edit"),
     oResult = $("#result"),
     oTip_txt = $(".tip_txt"),
     aGetConsoleForLine = [],
     aGetConsoleForLineBack = [],
-    editor
+    editor,
+    aItemOutput = [], //分段输出
+    sResult = '', //最终输出
+    delog = {}
 
   initFun()
 
@@ -56,106 +60,120 @@ window.onload = () => {
     })
     editor.focus()
     if (localStorage.inputValue) editor.setValue(localStorage.inputValue)
+    consoleInit()
   }
   //输出
   function consoleFun() {
     let inputStr = editor.getValue()
     if (inputStr) {
-      let aItemOutput = [], //分段输出
-        sResult = '', //最终输出
-        sCodeRun = '', //代码运行结果
-        logKey = inputStr.match(regMatch) //匹配"console.log()"
-        console.log(logKey)
-      if (logKey != null) {
-        let codeStr = inputStr.replace(regReplace, "return"), //要执行的code
-          tempStr = inputStr.replace(regMatch, "returnres"),
-          matchCodeStr = codeStr.match(regReturnMatch),
-          tempa, tempb
-
-        // console.log(tempa)
-        for (let logI = 0; logI < matchCodeStr.length; logI++) {
-          let regL = new RegExp(`return\(${matchCodeStr[logI].replace(regReturnReplace,'')}\)`)
-          // tempa=tempStr.replace(regReturnMatch,`$("#result").appendChild(<p>sdsd</p>)`)
-          console.log(regL)
-          // inputStr=inputStr.replace(/console.log(t)/g,'this')
-          // codeStr=codeStr.replace(regL,`eeeeee`)
-          console.log(codeStr.replace(regL, `eeeeee`))
-        }
-        aGetConsoleForLine = getLineFun(logKey)
-        sCodeRun = runFun(tempa)
-        aItemOutput.push(sCodeRun)
+      let logKey = inputStr.match(regMatch), //匹配用户 "console || alert"
+        codeStr = '' //要执行的code
+        logKey && (codeStr = inputStr.replace(regReplace, "console.log")) // 替换成 'console.log'
+        aGetConsoleForLine = getLineFun(logKey) // 行号
+        delog.log(logKey, 'logKey')
+        delog.log(aGetConsoleForLine, 'aGetConsoleForLine')
+        runFun(codeStr) // 运行
+        delog.log(aItemOutput, 'aItemOutput')
         localStorage.inputValue = inputStr
-        // for (let i = 0; i < aItemOutput.length; i++) {
-        //   let spanColor = '',
-        //     jsonH = ''
-        //   if (Array.isArray(aItemOutput[i])) {
-        //     for (let a = 0; a < aItemOutput[i].length; a++) {
-        //       jsonH += `<span class="blue_txt">${aItemOutput[i][a]}</span>，`
-        //     }
-        //     aItemOutput[i] = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
-        //   } else if (aItemOutput[i] == null) {
-        //     spanColor = 'gray_txt'
-        //   } else if (typeof aItemOutput[i] === 'string') {
-        //     aItemOutput[i] = `"<span class="blue_txt">${aItemOutput[i]}</span>"`
-        //   } else if (typeof aItemOutput[i] === 'boolean') {
-        //     spanColor = 'blue_txt'
-        //   } else if (typeof aItemOutput[i] === 'object') {
-        //     if (aItemOutput[i].__proto__.name && aItemOutput[i].__proto__.name === 'ReferenceError') {
-        //       spanColor = 'red_txt error'
-        //     } else {
-        //       if (isJSON(aItemOutput[i])) {
-        //         for (let k in aItemOutput[i]) {
-        //           jsonH += `<span>${k}：</span><span class="red_txt">"${aItemOutput[i][k]}"</span>，`
-        //         }
-        //         aItemOutput[i] = `{ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} }`
-        //         spanColor = 'json_span'
-        //       }
-        //     }
-        //   }
-        //   sResult += `<p class="flex-row"><span class="${spanColor}">${aItemOutput[i]}</span><span class="line_tip">行 ${aGetConsoleForLine[i]+1}</span></p>`
-        // }
-        // if (sResult) {
-        //   oTip_txt.style.display = 'none'
-        //   oResult.innerHTML = sResult
-        // }
-        aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
-        aGetConsoleForLine.length = 0
-        //点击行号跳转到对应的代码
-        for (let i = 0; i < $('.line_tip', true).length; i++) {
-          $('.line_tip', true)[i].addEventListener('click', () => {
-            editor.setCursor(aGetConsoleForLineBack[i])
-          })
+        for (let i = 0; i < aItemOutput.length; i++) {
+          outPutFun(aItemOutput[i], i)
+        }
+    }
+  }
+  
+  function _joinLog(item) {
+    let spanColor = '',
+      jsonH = ''
+    if (Array.isArray(item)) {
+      delog.log('Array')
+      for (let a = 0; a < item.length; a++) {
+        jsonH += `<span class="blue_txt">${item[a]}</span>，`
+      }
+      item = `[ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} ]`
+    } else if (item === null) {
+      delog.log('null')
+      spanColor = 'gray_txt'
+    } else if (typeof item === 'string') {
+      delog.log('string')
+      item = `"<span class="blue_txt">${item}</span>"`
+    } else if (typeof item === 'boolean') {
+      delog.log('boolean')
+      spanColor = 'blue_txt'
+    } else if (typeof item === 'object') {
+      delog.log(item.__proto__.__proto__, 'error')
+      if (item.__proto__.__proto__ && item.__proto__.__proto__.name === 'Error') {
+        spanColor = 'red_txt error'
+      } else {
+        if (isJSON(item)) {
+          for (let k in item) {
+            jsonH += `<span>${k}：</span><span class="red_txt">"${item[k]}"</span>，`
+          }
+          item = `{ ${jsonH.substring(0, jsonH.lastIndexOf('，'))} }`
+          spanColor = 'json_span'
         }
       }
     }
+    return {
+      spanColor,
+      item
+    }
   }
 
-  function testFun(arg) {
-    console.log(arg)
+  function outPutFun(aItemOutput, index) {
+    let _joinItem = '',
+      _joinJson = {}
+    if (aItemOutput.length > 1) {
+      _joinItem = ''
+      for (let i=0; i< aItemOutput.length; i++) {
+        _joinItem += `<span class="${_joinLog(aItemOutput[i]).spanColor}">${_joinLog(aItemOutput[i]).item}</span> `
+      }
+      _joinItem = `<span>${_joinItem}</span>`
+    } else {
+      if (Array.isArray(aItemOutput)) {
+        _joinJson = _joinLog(...aItemOutput)
+      } else {
+        _joinJson = _joinLog(aItemOutput)
+      }
+      _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
+    }
+    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip">行 ${aGetConsoleForLine[index]+1}</span></p>`
+    if (sResult) {
+      oTip_txt.style.display = 'none'
+      oResult.innerHTML = sResult
+    }
+    aGetConsoleForLineBack = [].concat(aGetConsoleForLine)
+    aGetConsoleForLine.length = 0
+    //点击行号跳转到对应的代码
+    for (let i = 0; i < $('.line_tip', true).length; i++) {
+      $('.line_tip', true)[i].addEventListener('click', () => {
+        editor.setCursor(aGetConsoleForLineBack[i])
+      })
+    }
   }
-
   function isJSON(str) {
     try {
-      let obj = JSON.stringify(str);
+      let obj = JSON.stringify(str)
       if (typeof obj == 'string' && obj) {
-        return true;
+        return true
       } else {
-        return false;
+        return false
       }
 
     } catch (e) {
-      return false;
+      return false
     }
   }
   //根据内容获取行号
   function getLineFun(sKey) {
     let aContent = editor.getLineHandle(editor.lineCount() - 1).parent.lines,
       nContent = 0
+    delog.log(aContent, 'aContent')
     for (let i = 0; i < sKey.length; i++) {
       for (let j = nContent; j < aContent.length; j++) {
         if (sKey[i] === aContent[j].text) {
           aGetConsoleForLine.push(j)
-          nContent = j + 1
+          // delog.log(j)
+          // nContent = j + 1
           break
         }
       }
@@ -174,9 +192,9 @@ window.onload = () => {
   //运行code
   function runFun(code) {
     try {
-      return Function(code)()
+      Function(code)()
     } catch (error) {
-      return error
+      aItemOutput.push(error)
     }
   }
   //快捷键
@@ -185,6 +203,7 @@ window.onload = () => {
       kc = e.keyCode || e.charCode
 
     if (kc === 82 && e.ctrlKey) {
+      aItemOutput = []
       consoleFun()
     } else if (kc === 73 && e.ctrlKey) {
       editor.focus()
@@ -194,12 +213,29 @@ window.onload = () => {
       saveFun()
     }
   }
+  function consoleInit() {
+    if(!window.console) {
+      window.console = {}
+    } else {
+      delog.log = window.console.log
+    }
+    window.console.log = (...args) => {
+      consoleAgent({
+        logType: 'log',
+        logs: args
+      })
+    }
+  }
+  function consoleAgent(item) {
+    aItemOutput.push(item.logs)
+    // delog.log(item.logs, 'agent')
+  }
   //保存
   function saveFun() {
     ipcRenderer.send('save')
   }
   ipcRenderer.on('saved-file', (event, path) =>{
     if(!path) path = 'no path'
-    console.log(`选择的路径：${path}`)
+    delog.log(`选择的路径：${path}`)
   })
 }
