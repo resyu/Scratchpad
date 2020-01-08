@@ -68,6 +68,8 @@ window.onload = () => {
     let inputStr = editor.getValue()
 
     sResult = ''
+    jLineNum = {}
+    aGetConsoleForLine.length = 0
     if (inputStr) {
       let logKey = inputStr.replace(regExegesis, '').trim().match(regMatch), //匹配用户 "console || alert"
         codeStr = '' //要执行的code
@@ -79,7 +81,7 @@ window.onload = () => {
       for (let i in logKey) {
         jLineNum[logKey[i].trim().match(regContent).toString()] = aGetConsoleForLine[i]
       }
-      runFun(codeStr) // 运行
+      Function(codeStr)() // 运行
     }
   }
 
@@ -117,8 +119,10 @@ window.onload = () => {
     }
   }
 
-  function outPutFun(oItem) {
+  function outPutFun(oItem, _lineno) {
     let _joinItem = '',
+      _line = '',
+      _lineNumber,
       _joinJson = {}
     
     // console单项内容大于一个
@@ -136,7 +140,13 @@ window.onload = () => {
       }
       _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
     }
-    sResult += `<p class="flex-row">${_joinItem}<span class="line_tip" data-n="${jLineNum[oItem.toString()]}">行 ${jLineNum[oItem.toString()]+1}</span></p>`
+    if (_lineno) {
+      _lineNumber = _lineno -3
+    } else {
+      _lineNumber = jLineNum[oItem.toString()]
+    }
+    _lineNumber && (_line = `<span class="line_tip" data-n="${_lineNumber}">行 ${_lineNumber+1}</span>`)
+    sResult += `<p class="flex-row">${_joinItem}${_line}</p>`
     if (sResult) {
       oTip_txt.style.display = 'none'
       oResult.innerHTML = sResult
@@ -189,13 +199,8 @@ window.onload = () => {
     editor.focus()
   }
 
-  //运行code
-  function runFun(code) {
-    try {
-      Function(code)()
-    } catch (error) {
-      outPutFun(error)
-    }
+  window.onerror = (_message, _filename, _lineno, _colno, error) => {
+    outPutFun(error, _lineno)
   }
 
   //快捷键
