@@ -29,7 +29,7 @@ html,body{height: 100%;}
 .CodeMirror-gutters{
   background: #FBF9F9 !important;
 }
-#state{color:#555;background: #FBF9F9;height: 14px;line-height: 14px;font-size: 12px;position: fixed;bottom:3px;padding:0 10px;text-align: right;right:20px;z-index: 999999;}
+#state{color:#555;background: #FBF9F9;height: 14px;line-height: 14px;font-size: 12px;position: fixed;bottom:3px;padding:0 10px;text-align: right;right:20px;z-index: 2;}
 .tip_txt{font-size: 12px;position: absolute;top:40%;left:6%;transform: translate(-6%,-40%);color:rgb(152, 152, 152);}
 .blue_txt{color:#456ddf}
 .red_txt{color:#df4566}
