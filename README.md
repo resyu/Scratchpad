@@ -11,9 +11,9 @@
 
 # Examples
 
-![default](https://resyu.github.io/images/s1.jpg)
+![default](https://resyu.github.io/images/default.jpg)
 
-![runing](https://resyu.github.io/images/s2.jpg)
+![runing](https://resyu.github.io/images/run.jpg)
 
 # install
 
