@@ -11,9 +11,9 @@
 
 # Examples
 
-![default](https://raw.githubusercontent.com/resyu/Scratchpad/master/assets/imgs/s1.jpg)
+![default](https://resyu.github.io/images/s1.jpg)
 
-![runing](https://raw.githubusercontent.com/resyu/Scratchpad/master/assets/imgs/s2.jpg)
+![runing](https://resyu.github.io/images/s2.jpg)
 
 # install
 
