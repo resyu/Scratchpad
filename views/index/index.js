@@ -126,14 +126,14 @@ window.onload = () => {
         for (let i = 1; i < oItem.length; i++) {
           _joinItem += `<span class="${_joinLog(oItem[i]).spanColor}">${_joinLog(oItem[i]).item}</span> `
         }
-        _joinItem = `<span>${_joinItem}</span>`
+        _joinItem = `<span class="first_span">${_joinItem}</span>`
       } else if (oItem.length === 1) {
         // ()
-        _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
+        _joinItem = `<span class="first_span ${_joinJson.spanColor}">${_joinJson.item}</span>`
       }
     } else {
       _joinJson = _joinLog(oItem)
-      _joinItem = `<span class="${_joinJson.spanColor}">${_joinJson.item}</span>`
+      _joinItem = `<span class="first_span ${_joinJson.spanColor}">${_joinJson.item}</span>`
     }
     if (_lineno) {
       _lineNumber = _lineno - 3
